@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
 // Types
 export interface User {
   user_id: string;
@@ -68,7 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser(JSON.parse(storedUser));
           
           // Verify token is still valid
-          const response = await axios.get('/api/auth/verify-token', {
+          const response = await axios.get(`${API_BASE_URL}/auth/verify-token`, {
             headers: {
               Authorization: `Bearer ${storedToken}`
             }
@@ -93,7 +95,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Login function
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post<AuthResponse>('/api/auth/login', {
+      const response = await axios.post<AuthResponse>(`${API_BASE_URL}/auth/login`, {
         email,
         password
       });
@@ -101,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const { access_token } = response.data;
 
       // Fetch full user details
-      const userResponse = await axios.get<User>('/api/auth/me', {
+      const userResponse = await axios.get<User>(`${API_BASE_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${access_token}`
         }
@@ -133,7 +135,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Register function
   const register = async (data: RegisterData) => {
     try {
-      await axios.post('/api/auth/register', data);
+      await axios.post(`${API_BASE_URL}/auth/register`, data);
 
       // After successful registration, automatically log in
       await login(data.email, data.password);
@@ -149,7 +151,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = async () => {
     try {
       if (token) {
-        await axios.post('/api/auth/logout', {}, {
+        await axios.post(`${API_BASE_URL}/auth/logout`, {}, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -167,7 +169,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!token) return;
 
     try {
-      const response = await axios.get<User>('/api/auth/me', {
+      const response = await axios.get<User>(`${API_BASE_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
